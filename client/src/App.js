@@ -10,10 +10,19 @@ import getWeb3 from "./getWeb3";
 import "./App.css";
 
 function App() {
-  const [state, setState] = useState({ storageValue: 0, web3: null, accounts: null, contract: null });
+  const [state, setState] = useState({ workflowStatus: null, web3: null, accounts: null, contract: null, addressValue: null });
   const inputRef = useRef();
   const [setEventValue, setSetEventValue] = useState (0)
-  
+
+  let arrayWorkflowStatus = [
+    'Registering voters',
+    'Proposals registration started',
+    'Proposals registration ended',
+    'Voting session started',
+    'Voting session ended',
+    'Votes tallied'
+  ];
+
   useEffect(() => {
     (async function () {
       try {
@@ -31,12 +40,14 @@ function App() {
           deployedNetwork && deployedNetwork.address,
         );
 
-        let value = await instance.methods.getAddresses().call();
+        
+        //let value = await instance.methods.getAddresses().call();
         // Set web3, accounts, and contract to the state, and then proceed with an
         // example of interacting with the contract's methods.
-        setState({ storageValue: value, web3: web3, accounts: accounts, contract: instance });
+        setState({ workflowStatus: 0, web3: web3, accounts: accounts, contract: instance });
 
-        await instance.events.SetEvent()
+
+        /*await instance.events.SetEvent()
           .on('data', event => {
             let value = event.returnValues.value;
             console.log(value);
@@ -45,7 +56,7 @@ function App() {
           .on('changed', changed => console.log(changed))
           // .on('error', err => throw err)
           .on('connected', str => console.log(str))
-
+*/
       } catch (error) {
         // Catch any errors for any of the above operations.
         alert(
@@ -56,15 +67,16 @@ function App() {
     })();
   }, [])
 
-  useEffect(()=> {
-    setState(s => ({...s, storageValue: setEventValue}))
-  }, [setEventValue])
+  // useEffect(()=> {
+  //   setState(s => ({...s, addressValue: setEventValue}))
+  // }, [setEventValue])
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { accounts, contract } = state;
-    let value = inputRef.current.value.toUpperCase();
-    await contract.methods.whitelist(value).send({ from: accounts[0] });
+    let value = inputRef.current.value;
+    console.log(value);
+    await contract.methods.addVoter(value).send({ from: accounts[0] });
   }
 
   const handleChange = (e) => {
@@ -80,14 +92,27 @@ function App() {
   return (
     <div className="App">
       <h1>Voting</h1>
-      <p>Vote en cours</p>
+      <p>Status : <i>{arrayWorkflowStatus[state.workflowStatus]}</i></p>
       <form onSubmit={handleSubmit} className="form">
         <label>
-          <input type="text" ref={inputRef} onChange={handleChange} className="input" />
+          <input type="text" placeholder="0x000000000000000000000000000000000000dead" ref={inputRef} onChange={handleChange} className="input" />
         </label>
-        <input type="submit" value="Envoyer" className="button" />
+        <input type="submit" value="Send address for white list" className="button" />
       </form>
-      <div>The stored value is: {state.storageValue}</div>
+
+      <input type="submit" value="Start proposals registration" className="button" />
+      <input type="submit" value="End proposals registration" className="button" />
+      <input type="submit" value="Start voting session" className="button" />
+      <input type="submit" value="End voting session" className="button" />
+      <input type="submit" value="Tallied votes" className="button" />
+
+      <form onSubmit={handleSubmit} className="form">
+        <label>
+          <input type="text" placeholder="proposal" ref={inputRef} onChange={handleChange} className="input" />
+        </label>
+        <input type="submit" value="Send proposal" className="button" />
+      </form>
+
     </div>
   );
 }
