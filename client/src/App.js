@@ -7,7 +7,7 @@ import getWeb3 from "./getWeb3";
 import "./App.css";
 
 function App() {
-  const [state, setState] = useState({ workflowStatus: null, web3: null, accounts: null, contract: null });
+  const [state, setState] = useState({ workflowStatus: null, web3: null, accounts: null, contract: null, ownerAddress: null });
   const inputRef = useRef();
   const [setEventValue, setSetEventValue] = useState (0)
 
@@ -37,12 +37,11 @@ function App() {
           deployedNetwork && deployedNetwork.address,
         );
 
-        
         let status = await instance.methods.getWorkflowStatus().call();
-        console.log(status);
+        const address = await instance.methods.owner().call();
         // Set web3, accounts, and contract to the state, and then proceed with an
         // example of interacting with the contract's methods.
-        setState({ workflowStatus: status, web3: web3, accounts: accounts, contract: instance });
+        setState({ workflowStatus: status, web3: web3, accounts: accounts, contract: instance, ownerAddress: address });
 
 
 /*        await instance.events.SetEvent()
@@ -94,6 +93,10 @@ function App() {
     return <div>Loading Web3, accounts, and contract...</div>;
   }
 
+  function isOwner() {
+    return state.accounts[0] === state.ownerAddress;
+  }
+
         // START PROPOSAL
         function showVotersRegistration() {
           return (
@@ -104,7 +107,7 @@ function App() {
               </label>
             <input type="submit" value="Send address for white list" />
             </form>
-            {state.accounts[0] ? <input onClick={handleChangeStatus} type="submit" value="Start proposals registration" className="button" /> : null}
+            {isOwner ? <input onClick={handleChangeStatus} type="submit" value="Start proposals registration" className="button" /> : null}
           </div>
           );
         }
@@ -118,7 +121,7 @@ function App() {
               </label>
             <input type="submit" value="Send proposal" />
             </form>
-            {state.accounts[0] ? <input onClick={handleChangeStatus2} type="submit" value="End proposals registration" className="button" /> : null}
+            {isOwner ? <input onClick={handleChangeStatus2} type="submit" value="End proposals registration" className="button" /> : null}
           </div>
           );
         }
@@ -126,7 +129,7 @@ function App() {
         function showEndProposals() {
           return (
           <div className="endProposals">
-            {state.accounts[0] ? <input onClick={handleChangeStatus3} type="submit" value="Start voting session" className="button" /> : null}
+            {isOwner ? <input onClick={handleChangeStatus3} type="submit" value="Start voting session" className="button" /> : null}
           </div>
           );
         }
@@ -136,7 +139,7 @@ function App() {
           <div className="startVotingSession">
             La session de vote a commencé:<i>
             Vote 1, Vote 2 etc.</i> (récupérer les votes)
-            {state.accounts[0] ? <input onClick={handleChangeStatus4} type="submit" value="End voting session" className="button" /> : null}
+            {isOwner ? <input onClick={handleChangeStatus4} type="submit" value="End voting session" className="button" /> : null}
           </div>
           );
         }
@@ -144,7 +147,7 @@ function App() {
         function showEndVotingSession() {
           return (
           <div className="startVotesTallied">
-            {state.accounts[0] ? <input value="Tallied the votes" type="submit" className="button" /> : null}
+            {isOwner ? <input value="Tallied the votes" type="submit" className="button" /> : null}
           </div>
           );
         }
@@ -179,7 +182,8 @@ function App() {
     <div className="App">
       <h1>Voting</h1>
       <p>Status : <i>{arrayWorkflowStatus[state.workflowStatus]}</i></p>
-      <p>Tous les changements de status doivent être fait par admin</p>
+      <p>Tous les changements de status doivent être fait par owner</p>
+      <p>ADRESSE OWNER: {state.ownerAddress}</p>
 
       <input onClick={getStatus} type="submit" value="Status" className="button" />
 
@@ -188,6 +192,8 @@ function App() {
       {state.workflowStatus == 2 ? showEndProposals() : null}
       {state.workflowStatus == 3 ? showStartVotingSession() : null}
       {state.workflowStatus == 4 ? showEndVotingSession() : null}
+
+      <div id="address"></div>
 
     </div>
   );
