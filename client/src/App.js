@@ -2,15 +2,12 @@ import React, { Component, useEffect, useState, useRef } from 'react';
 import VotingContract from "./contracts/Voting.json";
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Header from './composants/Header';
-import Contacts from './composants/Contacts';
-import Add from './composants/Add'
 import getWeb3 from "./getWeb3";
 
 import "./App.css";
 
 function App() {
-  const [state, setState] = useState({ workflowStatus: null, web3: null, accounts: null, contract: null, addressValue: null });
+  const [state, setState] = useState({ workflowStatus: null, web3: null, accounts: null, contract: null });
   const inputRef = useRef();
   const [setEventValue, setSetEventValue] = useState (0)
 
@@ -41,13 +38,14 @@ function App() {
         );
 
         
-        //let value = await instance.methods.getAddresses().call();
+        let status = await instance.methods.getWorkflowStatus().call();
+        console.log(status);
         // Set web3, accounts, and contract to the state, and then proceed with an
         // example of interacting with the contract's methods.
-        setState({ workflowStatus: 0, web3: web3, accounts: accounts, contract: instance });
+        setState({ workflowStatus: status, web3: web3, accounts: accounts, contract: instance });
 
 
-        /*await instance.events.SetEvent()
+/*        await instance.events.SetEvent()
           .on('data', event => {
             let value = event.returnValues.value;
             console.log(value);
@@ -56,7 +54,8 @@ function App() {
           .on('changed', changed => console.log(changed))
           // .on('error', err => throw err)
           .on('connected', str => console.log(str))
-*/
+
+          */
       } catch (error) {
         // Catch any errors for any of the above operations.
         alert(
@@ -67,15 +66,14 @@ function App() {
     })();
   }, [])
 
-  // useEffect(()=> {
-  //   setState(s => ({...s, addressValue: setEventValue}))
-  // }, [setEventValue])
+  useEffect(()=> {
+    setState(s => ({...s, addressValue: setEventValue}))
+  }, [setEventValue])
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { accounts, contract } = state;
     let value = inputRef.current.value;
-    console.log(value);
     await contract.methods.addVoter(value).send({ from: accounts[0] });
   }
 
@@ -89,32 +87,92 @@ function App() {
     return <div>Loading Web3, accounts, and contract...</div>;
   }
 
+        // START PROPOSAL
+        function showVotersRegistration() {
+          return (
+          <div className="votersRegistration">
+            <form onSubmit={handleSubmit}>
+              <label>
+                  <input type="text" value={state.value} placeholder="0x000000000000000000000000000000000000dead" onChange={handleChange} />
+              </label>
+            <input type="submit" value="Send address for white list" />
+            </form>
+            <input onClick={handleChangeStatus} type="submit" value="Start proposals registration" className="button" />
+          </div>
+          );
+        }
+
+        function showStartProposals() {
+          return (
+          <div className="startProposals">
+            <input type="submit" value="End proposals registration" className="button" />
+          </div>
+          );
+        }
+
+        function showEndProposals() {
+          return (
+          <div className="endProposals">
+            <input type="submit" value="Start voting session" className="button" />
+          </div>
+          );
+        }
+
+        function showStartVotingSession() {
+          return (
+          <div className="startVotingSession">
+            <input type="submit" value="End voting session" className="button" />
+          </div>
+          );
+        }
+
+        function showEndVotingSession() {
+          return (
+          <div className="endVotingSession">
+            <input type="submit" value="End proposals registration" className="button" />
+          </div>
+          );
+        }
+
+        function showTalliedVotes() {
+          return (
+          <div className="talliedVotes">
+            <input type="submit" value="Tallied votes" className="button" />
+          </div>
+          );
+        }
+
+        const handleChangeStatus = async (e) => {
+          //const { accounts, contract } = state;
+          //await contract.methods.startProposalsRegistering().send({ from: accounts[0] });
+        }
+
   return (
     <div className="App">
       <h1>Voting</h1>
       <p>Status : <i>{arrayWorkflowStatus[state.workflowStatus]}</i></p>
-      <form onSubmit={handleSubmit} className="form">
-        <label>
-          <input type="text" placeholder="0x000000000000000000000000000000000000dead" ref={inputRef} onChange={handleChange} className="input" />
-        </label>
-        <input type="submit" value="Send address for white list" className="button" />
-      </form>
 
-      <input type="submit" value="Start proposals registration" className="button" />
-      <input type="submit" value="End proposals registration" className="button" />
-      <input type="submit" value="Start voting session" className="button" />
-      <input type="submit" value="End voting session" className="button" />
-      <input type="submit" value="Tallied votes" className="button" />
-
-      <form onSubmit={handleSubmit} className="form">
-        <label>
-          <input type="text" placeholder="proposal" ref={inputRef} onChange={handleChange} className="input" />
-        </label>
-        <input type="submit" value="Send proposal" className="button" />
-      </form>
+      {state.workflowStatus == 0 ? showVotersRegistration() : null}
+      {state.workflowStatus == 1 ? showStartProposals() : null}
+      {state.workflowStatus == 2 ? showEndProposals() : null}
+      {state.workflowStatus == 3 ? showStartVotingSession() : null}
+      {state.workflowStatus == 4 ? showEndVotingSession() : null}
+      {state.workflowStatus == 5 ? showTalliedVotes() : null}
 
     </div>
   );
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 export default App;
