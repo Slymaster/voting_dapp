@@ -7,7 +7,7 @@ import getWeb3 from "./getWeb3";
 import "./App.css";
 
 function App() {
-  const [state, setState] = useState({ workflowStatus: null, web3: null, accounts: null, contract: null, ownerAddress: null, isRegisteredVoter: null, proposals: null });
+  const [state, setState] = useState({ workflowStatus: null, web3: null, accounts: null, contract: null, ownerAddress: null, isRegisteredVoter: null, proposals: [] });
   const inputRef = useRef();
   const [setEventValue, setSetEventValue] = useState (0)
 
@@ -41,7 +41,7 @@ function App() {
         const address = await instance.methods.owner().call();
         // Set web3, accounts, and contract to the state, and then proceed with an
         // example of interacting with the contract's methods.
-        setState({ workflowStatus: status, web3: web3, accounts: accounts, contract: instance, ownerAddress: address, isRegisteredVoter: null, proposals: null });
+        setState({ workflowStatus: status, web3: web3, accounts: accounts, contract: instance, ownerAddress: address, isRegisteredVoter: null, proposals: [] });
 
 
       /*  await instance.events.SetEvent()
@@ -82,6 +82,13 @@ function App() {
     const { accounts, contract } = state;
     let value = inputRef.current.value;
     await contract.methods.addProposal(value).send({ from: accounts[0] });
+  }
+
+  const handleSubmitVote = async (e) => {
+    e.preventDefault();
+    const { accounts, contract } = state;   
+    let id = document.querySelector('input[name="vote"]:checked').id
+    await contract.methods.setVote(id).send({ from: accounts[0] });
   }
 
   const handleChange = (e) => {
@@ -146,10 +153,44 @@ function App() {
           );
         }
 
+        const ColoredLine = ({ color }) => (
+          <hr
+              style={{
+                  color: color,
+                  backgroundColor: color,
+                  height: 5
+              }}
+          />
+      );
+
+      function onChange(value) {
+        console.log(value);
+      }
+        
+        const getProposals = async (e) => {
+          const { accounts, contract } = state;
+          const result = await contract.methods.getProposals().call({ from: accounts[0] });
+          setState(s => ({...s, proposals: result}))
+        }
+
         function showStartVotingSession() {
           return (
           <div className="startVotingSession">
-            {console.log(listProposals)}
+            {state.proposals.length === 0 && state.isRegisteredVoter ? <input onClick={getProposals} type="submit" value="Show me proposals" className="button" /> : null }
+            <ColoredLine color="blue" />
+            <form onSubmit={handleSubmitVote}>
+            {
+              state.proposals.map((element,i) => {
+                return(
+                <div>
+                  <input type="radio" name="vote" value={element.description} id={i} key={i} />
+                  <label for="{i}">{element.description}</label>
+                </div>
+                );
+              })
+            }
+            {state.proposals.length > 0 ? <input value="Send vote" type="submit" className="button" /> : null }
+            </form>
             {isOwner() ? <input onClick={handleChangeStatus4} type="submit" value="End voting session" className="button" /> : null}
           </div>
           );
@@ -173,14 +214,11 @@ function App() {
           await contract.methods.endProposalsRegistering().send({ from: accounts[0] });
         }
         
-        let listProposals;
         const handleChangeStatus3 = async (e) => {
           const { accounts, contract } = state;
           await contract.methods.startVotingSession().send({ from: accounts[0] });
-          //?
-          let toto = await contract.methods.getProposals().call({ from: accounts[0] });
-          listProposals.push(toto);
         }
+
 
         const handleChangeStatus4 = async (e) => {
           const { accounts, contract } = state;
