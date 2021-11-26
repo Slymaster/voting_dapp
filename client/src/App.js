@@ -104,7 +104,7 @@ function App() {
               </label>
             <input type="submit" value="Send address for white list" />
             </form>
-            <input onClick={handleChangeStatus} type="submit" value="Start proposals registration" className="button" />
+            {state.accounts[0] ? <input onClick={handleChangeStatus} type="submit" value="Start proposals registration" className="button" /> : null}
           </div>
           );
         }
@@ -118,7 +118,7 @@ function App() {
               </label>
             <input type="submit" value="Send proposal" />
             </form>
-            <input onClick={handleChangeStatus2} type="submit" value="End proposals registration" className="button" />
+            {state.accounts[0] ? <input onClick={handleChangeStatus2} type="submit" value="End proposals registration" className="button" /> : null}
           </div>
           );
         }
@@ -126,7 +126,7 @@ function App() {
         function showEndProposals() {
           return (
           <div className="endProposals">
-            <input onClick={handleChangeStatus3} type="submit" value="Start voting session" className="button" />
+            {state.accounts[0] ? <input onClick={handleChangeStatus3} type="submit" value="Start voting session" className="button" /> : null}
           </div>
           );
         }
@@ -136,7 +136,7 @@ function App() {
           <div className="startVotingSession">
             La session de vote a commencé:<i>
             Vote 1, Vote 2 etc.</i> (récupérer les votes)
-            <input onClick={handleChangeStatus4} type="submit" value="End voting session" className="button" />
+            {state.accounts[0] ? <input onClick={handleChangeStatus4} type="submit" value="End voting session" className="button" /> : null}
           </div>
           );
         }
@@ -144,7 +144,7 @@ function App() {
         function showEndVotingSession() {
           return (
           <div className="startVotesTallied">
-            <input value="Tallied the votes" type="submit" className="button" />
+            {state.accounts[0] ? <input value="Tallied the votes" type="submit" className="button" /> : null}
           </div>
           );
         }
