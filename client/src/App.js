@@ -77,6 +77,13 @@ function App() {
     await contract.methods.addVoter(value).send({ from: accounts[0] });
   }
 
+  const handleSubmitProposal = async (e) => {
+    e.preventDefault();
+    const { accounts, contract } = state;
+    let value = inputRef.current.value;
+    await contract.methods.addProposal(value).send({ from: accounts[0] });
+  }
+
   const handleChange = (e) => {
     if (e.target.value < 0) {
       e.target.value = e.target.value.slice(0, 0);
@@ -93,7 +100,7 @@ function App() {
           <div className="votersRegistration">
             <form onSubmit={handleSubmit}>
               <label>
-                  <input type="text" value={state.value} placeholder="0x000000000000000000000000000000000000dead" onChange={handleChange} />
+                  <input type="text" ref={inputRef} value={state.value} placeholder="0x000000000000000000000000000000000000dead" onChange={handleChange} />
               </label>
             <input type="submit" value="Send address for white list" />
             </form>
@@ -105,7 +112,13 @@ function App() {
         function showStartProposals() {
           return (
           <div className="startProposals">
-            <input type="submit" value="End proposals registration" className="button" />
+            <form onSubmit={handleSubmitProposal}>
+              <label>
+                  <input type="text" ref={inputRef} value={state.value} placeholder="Proposal" onChange={handleChange} />
+              </label>
+            <input type="submit" value="Send proposal" />
+            </form>
+            <input onClick={handleChangeStatus2} type="submit" value="End proposals registration" className="button" />
           </div>
           );
         }
@@ -113,7 +126,7 @@ function App() {
         function showEndProposals() {
           return (
           <div className="endProposals">
-            <input type="submit" value="Start voting session" className="button" />
+            <input onClick={handleChangeStatus3} type="submit" value="Start voting session" className="button" />
           </div>
           );
         }
@@ -121,43 +134,60 @@ function App() {
         function showStartVotingSession() {
           return (
           <div className="startVotingSession">
-            <input type="submit" value="End voting session" className="button" />
+            La session de vote a commencé:<i>
+            Vote 1, Vote 2 etc.</i> (récupérer les votes)
+            <input onClick={handleChangeStatus4} type="submit" value="End voting session" className="button" />
           </div>
           );
         }
 
         function showEndVotingSession() {
           return (
-          <div className="endVotingSession">
-            <input type="submit" value="End proposals registration" className="button" />
-          </div>
-          );
-        }
-
-        function showTalliedVotes() {
-          return (
-          <div className="talliedVotes">
-            <input type="submit" value="Tallied votes" className="button" />
+          <div className="startVotesTallied">
+            <input value="Tallied the votes" type="submit" className="button" />
           </div>
           );
         }
 
         const handleChangeStatus = async (e) => {
-          //const { accounts, contract } = state;
-          //await contract.methods.startProposalsRegistering().send({ from: accounts[0] });
+          const { accounts, contract } = state;
+          await contract.methods.startProposalsRegistering().send({ from: accounts[0] });
+        }
+
+        const handleChangeStatus2 = async (e) => {
+          const { accounts, contract } = state;
+          await contract.methods.endProposalsRegistering().send({ from: accounts[0] });
+        }
+
+        const handleChangeStatus3 = async (e) => {
+          const { accounts, contract } = state;
+          await contract.methods.startVotingSession().send({ from: accounts[0] });
+        }
+
+        const handleChangeStatus4 = async (e) => {
+          const { accounts, contract } = state;
+          await contract.methods.endVotingSession().send({ from: accounts[0] });
+        }
+
+        const getStatus = async (e) => {
+          const { accounts, contract } = state;
+          let status = await contract.methods.getWorkflowStatus().call();
+          console.log(status);
         }
 
   return (
     <div className="App">
       <h1>Voting</h1>
       <p>Status : <i>{arrayWorkflowStatus[state.workflowStatus]}</i></p>
+      <p>Tous les changements de status doivent être fait par admin</p>
+
+      <input onClick={getStatus} type="submit" value="Status" className="button" />
 
       {state.workflowStatus == 0 ? showVotersRegistration() : null}
       {state.workflowStatus == 1 ? showStartProposals() : null}
       {state.workflowStatus == 2 ? showEndProposals() : null}
       {state.workflowStatus == 3 ? showStartVotingSession() : null}
       {state.workflowStatus == 4 ? showEndVotingSession() : null}
-      {state.workflowStatus == 5 ? showTalliedVotes() : null}
 
     </div>
   );

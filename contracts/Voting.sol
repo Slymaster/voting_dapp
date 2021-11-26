@@ -50,8 +50,8 @@ contract Voting is Ownable {
 
     // ::::::::::::: GETTERS ::::::::::::: //
 
-    function getWorkflowStatus() external pure returns (WorkflowStatus status) {
-        return status;
+    function getWorkflowStatus() external view returns (WorkflowStatus status) {
+        return workflowStatus;
     }
 
     function getVoter(address _addr) external onlyVoters view returns (Voter memory) {
