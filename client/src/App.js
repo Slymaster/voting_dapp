@@ -7,7 +7,7 @@ import getWeb3 from "./getWeb3";
 import "./App.css";
 
 function App() {
-  const [state, setState] = useState({ workflowStatus: null, web3: null, accounts: null, contract: null, ownerAddress: null });
+  const [state, setState] = useState({ workflowStatus: null, web3: null, accounts: null, contract: null, ownerAddress: null, isRegisteredVoter: null });
   const inputRef = useRef();
   const [setEventValue, setSetEventValue] = useState (0)
 
@@ -41,7 +41,7 @@ function App() {
         const address = await instance.methods.owner().call();
         // Set web3, accounts, and contract to the state, and then proceed with an
         // example of interacting with the contract's methods.
-        setState({ workflowStatus: status, web3: web3, accounts: accounts, contract: instance, ownerAddress: address });
+        setState({ workflowStatus: status, web3: web3, accounts: accounts, contract: instance, ownerAddress: address, isRegisteredVoter: null });
 
 
 /*        await instance.events.SetEvent()
@@ -97,6 +97,12 @@ function App() {
     return state.accounts[0] === state.ownerAddress;
   }
 
+  const isVoter = async (e) => {
+    const { accounts, contract } = state;
+    let voter = await contract.methods.getVoter(state.accounts[0]).call({ from: accounts[0] });
+    setState(s => ({...s, isRegisteredVoter: voter.isRegistered}))
+  }
+
         // START PROPOSAL
         function showVotersRegistration() {
           return (
@@ -107,21 +113,24 @@ function App() {
               </label>
             <input type="submit" value="Send address for white list" />
             </form>
-            {isOwner ? <input onClick={handleChangeStatus} type="submit" value="Start proposals registration" className="button" /> : null}
+            {isOwner() ? <input onClick={handleChangeStatus} type="submit" value="Start proposals registration" className="button" /> : null}
           </div>
           );
         }
 
         function showStartProposals() {
+          isVoter();
           return (
           <div className="startProposals">
+            {state.isRegisteredVoter ?
             <form onSubmit={handleSubmitProposal}>
               <label>
                   <input type="text" ref={inputRef} value={state.value} placeholder="Proposal" onChange={handleChange} />
               </label>
             <input type="submit" value="Send proposal" />
             </form>
-            {isOwner ? <input onClick={handleChangeStatus2} type="submit" value="End proposals registration" className="button" /> : null}
+            : null}
+            {isOwner() ? <input onClick={handleChangeStatus2} type="submit" value="End proposals registration" className="button" /> : null}
           </div>
           );
         }
@@ -129,7 +138,7 @@ function App() {
         function showEndProposals() {
           return (
           <div className="endProposals">
-            {isOwner ? <input onClick={handleChangeStatus3} type="submit" value="Start voting session" className="button" /> : null}
+            {isOwner() ? <input onClick={handleChangeStatus3} type="submit" value="Start voting session" className="button" /> : null}
           </div>
           );
         }
@@ -139,7 +148,7 @@ function App() {
           <div className="startVotingSession">
             La session de vote a commencé:<i>
             Vote 1, Vote 2 etc.</i> (récupérer les votes)
-            {isOwner ? <input onClick={handleChangeStatus4} type="submit" value="End voting session" className="button" /> : null}
+            {isOwner() ? <input onClick={handleChangeStatus4} type="submit" value="End voting session" className="button" /> : null}
           </div>
           );
         }
@@ -147,7 +156,7 @@ function App() {
         function showEndVotingSession() {
           return (
           <div className="startVotesTallied">
-            {isOwner ? <input value="Tallied the votes" type="submit" className="button" /> : null}
+            {isOwner() ? <input value="Tallied the votes" type="submit" className="button" /> : null}
           </div>
           );
         }
@@ -187,11 +196,11 @@ function App() {
 
       <input onClick={getStatus} type="submit" value="Status" className="button" />
 
-      {state.workflowStatus == 0 ? showVotersRegistration() : null}
-      {state.workflowStatus == 1 ? showStartProposals() : null}
-      {state.workflowStatus == 2 ? showEndProposals() : null}
-      {state.workflowStatus == 3 ? showStartVotingSession() : null}
-      {state.workflowStatus == 4 ? showEndVotingSession() : null}
+      {state.workflowStatus === '0' ? showVotersRegistration() : null}
+      {state.workflowStatus === '1' ? showStartProposals() : null}
+      {state.workflowStatus === '2' ? showEndProposals() : null}
+      {state.workflowStatus === '3' ? showStartVotingSession() : null}
+      {state.workflowStatus === '4' ? showEndVotingSession() : null}
 
       <div id="address"></div>
 
