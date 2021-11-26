@@ -7,7 +7,7 @@ import getWeb3 from "./getWeb3";
 import "./App.css";
 
 function App() {
-  const [state, setState] = useState({ workflowStatus: null, web3: null, accounts: null, contract: null, ownerAddress: null, isRegisteredVoter: null });
+  const [state, setState] = useState({ workflowStatus: null, web3: null, accounts: null, contract: null, ownerAddress: null, isRegisteredVoter: null, proposals: null });
   const inputRef = useRef();
   const [setEventValue, setSetEventValue] = useState (0)
 
@@ -41,10 +41,10 @@ function App() {
         const address = await instance.methods.owner().call();
         // Set web3, accounts, and contract to the state, and then proceed with an
         // example of interacting with the contract's methods.
-        setState({ workflowStatus: status, web3: web3, accounts: accounts, contract: instance, ownerAddress: address, isRegisteredVoter: null });
+        setState({ workflowStatus: status, web3: web3, accounts: accounts, contract: instance, ownerAddress: address, isRegisteredVoter: null, proposals: null });
 
 
-/*        await instance.events.SetEvent()
+      /*  await instance.events.SetEvent()
           .on('data', event => {
             let value = event.returnValues.value;
             console.log(value);
@@ -53,8 +53,8 @@ function App() {
           .on('changed', changed => console.log(changed))
           // .on('error', err => throw err)
           .on('connected', str => console.log(str))
-
-          */
+*/
+          
       } catch (error) {
         // Catch any errors for any of the above operations.
         alert(
@@ -74,6 +74,7 @@ function App() {
     const { accounts, contract } = state;
     let value = inputRef.current.value;
     await contract.methods.addVoter(value).send({ from: accounts[0] });
+
   }
 
   const handleSubmitProposal = async (e) => {
@@ -105,14 +106,16 @@ function App() {
 
         // START PROPOSAL
         function showVotersRegistration() {
-          return (
+          return ( 
           <div className="votersRegistration">
+          { isOwner() ?
             <form onSubmit={handleSubmit}>
               <label>
                   <input type="text" ref={inputRef} value={state.value} placeholder="0x000000000000000000000000000000000000dead" onChange={handleChange} />
               </label>
             <input type="submit" value="Send address for white list" />
-            </form>
+            </form> 
+            : null }
             {isOwner() ? <input onClick={handleChangeStatus} type="submit" value="Start proposals registration" className="button" /> : null}
           </div>
           );
@@ -146,8 +149,7 @@ function App() {
         function showStartVotingSession() {
           return (
           <div className="startVotingSession">
-            La session de vote a commencé:<i>
-            Vote 1, Vote 2 etc.</i> (récupérer les votes)
+            {console.log(listProposals)}
             {isOwner() ? <input onClick={handleChangeStatus4} type="submit" value="End voting session" className="button" /> : null}
           </div>
           );
@@ -170,10 +172,14 @@ function App() {
           const { accounts, contract } = state;
           await contract.methods.endProposalsRegistering().send({ from: accounts[0] });
         }
-
+        
+        let listProposals;
         const handleChangeStatus3 = async (e) => {
           const { accounts, contract } = state;
           await contract.methods.startVotingSession().send({ from: accounts[0] });
+          //?
+          let toto = await contract.methods.getProposals().call({ from: accounts[0] });
+          listProposals.push(toto);
         }
 
         const handleChangeStatus4 = async (e) => {
@@ -181,20 +187,11 @@ function App() {
           await contract.methods.endVotingSession().send({ from: accounts[0] });
         }
 
-        const getStatus = async (e) => {
-          const { accounts, contract } = state;
-          let status = await contract.methods.getWorkflowStatus().call();
-          console.log(status);
-        }
-
   return (
     <div className="App">
       <h1>Voting</h1>
       <p>Status : <i>{arrayWorkflowStatus[state.workflowStatus]}</i></p>
-      <p>Tous les changements de status doivent être fait par owner</p>
-      <p>ADRESSE OWNER: {state.ownerAddress}</p>
-
-      <input onClick={getStatus} type="submit" value="Status" className="button" />
+      <p>Owner: {state.ownerAddress}</p>
 
       {state.workflowStatus === '0' ? showVotersRegistration() : null}
       {state.workflowStatus === '1' ? showStartProposals() : null}
@@ -206,18 +203,6 @@ function App() {
 
     </div>
   );
-
-
-
-
-
-
-
-
-
-
-
-
 }
 
 export default App;

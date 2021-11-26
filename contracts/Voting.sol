@@ -54,6 +54,10 @@ contract Voting is Ownable {
         return workflowStatus;
     }
 
+    function getProposals() external view returns(Proposal[] memory) {
+        return proposalsArray;
+    }
+
     function getVoter(address _addr) external onlyVoters view returns (Voter memory) {
         return voters[_addr];
     }
