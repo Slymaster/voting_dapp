@@ -7,7 +7,7 @@ import getWeb3 from "./getWeb3";
 import "./App.css";
 
 function App() {
-  const [state, setState] = useState({ workflowStatus: null, web3: null, accounts: null, contract: null, ownerAddress: null, isRegisteredVoter: null, proposals: [] });
+  const [state, setState] = useState({ workflowStatus: null, web3: null, accounts: null, contract: null, ownerAddress: null, isRegisteredVoter: null, proposals: [], winner: null });
   const inputRef = useRef();
   const [setEventValue, setSetEventValue] = useState (0)
 
@@ -41,7 +41,7 @@ function App() {
         const address = await instance.methods.owner().call();
         // Set web3, accounts, and contract to the state, and then proceed with an
         // example of interacting with the contract's methods.
-        setState({ workflowStatus: status, web3: web3, accounts: accounts, contract: instance, ownerAddress: address, isRegisteredVoter: null, proposals: [] });
+        setState({ workflowStatus: status, web3: web3, accounts: accounts, contract: instance, ownerAddress: address, isRegisteredVoter: null, proposals: [], winner: null });
 
 
       /*  await instance.events.SetEvent()
@@ -204,6 +204,22 @@ function App() {
           );
         }
 
+        const getWinner = async (e) => {
+          const { accounts, contract } = state;
+          let winner = await contract.methods.getWinner().call();
+          console.log(winner);
+          setState(s => ({...s, winner: winner.description}))
+        }
+
+        function showWinner() {
+          return (
+          <div className="startVotesTallied">
+            <input onClick={getWinner} value="Get winner" type="submit" className="button" />
+            <p>The winner is : {state.winner}</p>
+          </div>
+          );
+        }
+
         const handleChangeStatus = async (e) => {
           const { accounts, contract } = state;
           await contract.methods.startProposalsRegistering().send({ from: accounts[0] });
@@ -227,8 +243,7 @@ function App() {
 
         const handleChangeStatus5 = async (e) => {
           const { accounts, contract } = state;
-          //tallied votes etc. & getWinner+showWinner
-          await contract.methods.endVotingSession().send({ from: accounts[0] });
+          await contract.methods.tallyVotes().send({ from: accounts[0] });
         }
 
   return (
@@ -236,17 +251,16 @@ function App() {
       <h1>Voting</h1>
       <p>Status : <i>{arrayWorkflowStatus[state.workflowStatus]}</i></p>
       <p>Owner: {state.ownerAddress}</p>
-
       {
         {
           '0': showVotersRegistration(),
           '1': showStartProposals(),
           '2': showEndProposals(),
           '3': showStartVotingSession(),
-          '4': showEndVotingSession()
+          '4': showEndVotingSession(),
+          '5': showWinner()
         }[state.workflowStatus]
       }
-
     </div>
   );
 }
