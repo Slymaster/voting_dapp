@@ -236,7 +236,7 @@ function App() {
           const { contract } = state;
           let winner = await contract.methods.getWinner().call();
           console.log(winner);
-          setState(s => ({...s, winner: winner.description}))
+          setState(s => ({...s, winner: winner.description + ' 🏆'}))
         }
 
         function showWinner() {
