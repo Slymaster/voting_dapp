@@ -252,7 +252,7 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Voting</h1>
+      <h1>Voting</h1>    
       <p>Status : <i>{arrayWorkflowStatus[state.workflowStatus]}</i></p>
       <p>Owner: {state.ownerAddress}</p>
       {

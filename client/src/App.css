@@ -1,5 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
 .App {
   text-align: center;
+  font-family: 'Roboto', sans-serif;
+  background-image:  radial-gradient(#1ee2d8 1.70px, transparent 1.70px), radial-gradient(#1ee2d8 1.70px, rgba(34, 13, 219, 0.075) 1.70px);
+  background-size: 68px 68px;
+  background-position: 0 0,34px 34px;
 }
 
 .App-logo {
