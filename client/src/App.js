@@ -72,23 +72,22 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { accounts, contract } = state;
-    let value = inputRef.current.value;
-    await contract.methods.addVoter(value).send({ from: accounts[0] });
+    let value;
+    switch (state.workflowStatus) {
+      case '0':
+        value = inputRef.current.value;
+        await contract.methods.addVoter(value).send({ from: accounts[0] });
+        break;
+      case '1':
+        value = inputRef.current.value;
+        await contract.methods.addProposal(value).send({ from: accounts[0] });
+        break;
+      case '3':
+        let id = document.querySelector('input[name="vote"]:checked').id
+        await contract.methods.setVote(id).send({ from: accounts[0] });
+        break;
+    }
 
-  }
-
-  const handleSubmitProposal = async (e) => {
-    e.preventDefault();
-    const { accounts, contract } = state;
-    let value = inputRef.current.value;
-    await contract.methods.addProposal(value).send({ from: accounts[0] });
-  }
-
-  const handleSubmitVote = async (e) => {
-    e.preventDefault();
-    const { accounts, contract } = state;   
-    let id = document.querySelector('input[name="vote"]:checked').id
-    await contract.methods.setVote(id).send({ from: accounts[0] });
   }
 
   const handleChange = (e) => {
@@ -111,7 +110,7 @@ function App() {
     setState(s => ({...s, isRegisteredVoter: voter.isRegistered}))
   }
 
-        // START PROPOSAL
+        // Start voters registration
         function showVotersRegistration() {
           return ( 
           <div className="votersRegistration">
@@ -128,12 +127,13 @@ function App() {
           );
         }
 
+        // Start proposals
         function showStartProposals() {
           isVoter();
           return (
           <div className="startProposals">
             {state.isRegisteredVoter ?
-            <form onSubmit={handleSubmitProposal}>
+            <form onSubmit={handleSubmit}>
               <label>
                   <input type="text" ref={inputRef} value={state.value} placeholder="Proposal" onChange={handleChange} />
               </label>
@@ -145,6 +145,7 @@ function App() {
           );
         }
 
+        // End proposals
         function showEndProposals() {
           return (
           <div className="endProposals">
@@ -178,7 +179,7 @@ function App() {
           <div className="startVotingSession">
             {state.proposals.length === 0 && state.isRegisteredVoter ? <input onClick={getProposals} type="submit" value="Show me proposals" className="button" /> : null }
             <ColoredLine color="blue" />
-            <form onSubmit={handleSubmitVote}>
+            <form onSubmit={handleSubmit}>
             {
               state.proposals.map((element,i) => {
                 return(
