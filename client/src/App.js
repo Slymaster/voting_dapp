@@ -66,7 +66,7 @@ function App() {
   }, [])
 
   useEffect(()=> {
-    setState(s => ({...s, addressValue: setEventValue}))
+    setState(s => ({...s, workflowStatus: setEventValue}))
   }, [setEventValue])
 
   const handleSubmit = async (e) => {
@@ -87,8 +87,35 @@ function App() {
         await contract.methods.setVote(id).send({ from: accounts[0] });
         break;
     }
-
   }
+
+  const handleChangeStatus = async (e) => {
+    const { accounts, contract } = state;
+    switch(state.workflowStatus) {
+      case '0':
+        await contract.methods.startProposalsRegistering().send({ from: accounts[0] });
+        setState(s => ({...s, workflowStatus: '1'}))
+        break;
+      case '1':
+        await contract.methods.endProposalsRegistering().send({ from: accounts[0] });
+        setState(s => ({...s, workflowStatus: '2'}))
+        break;
+      case '2':
+        await contract.methods.startVotingSession().send({ from: accounts[0] });
+        setState(s => ({...s, workflowStatus: '3'}))
+        break;
+      case '3':
+        await contract.methods.endVotingSession().send({ from: accounts[0] });
+        setState(s => ({...s, workflowStatus: '4'}))
+        break;
+      case '4':
+        await contract.methods.tallyVotes().send({ from: accounts[0] });
+        setState(s => ({...s, workflowStatus: '5'}))
+        break;
+    }
+  }
+
+
 
   const handleChange = (e) => {
     if (e.target.value < 0) {
@@ -221,27 +248,7 @@ function App() {
           );
         }
 
-        const handleChangeStatus = async (e) => {
-          const { accounts, contract } = state;
-          switch(state.workflowStatus) {
-            case '0':
-              await contract.methods.startProposalsRegistering().send({ from: accounts[0] });
-              break;
-            case '1':
-              await contract.methods.endProposalsRegistering().send({ from: accounts[0] });
-              break;
-            case '2':
-              await contract.methods.startVotingSession().send({ from: accounts[0] });
-              break;
-            case '3':
-              await contract.methods.endVotingSession().send({ from: accounts[0] });
-              break;
-            case '4':
-              await contract.methods.tallyVotes().send({ from: accounts[0] });
-              break;
-          }
-          
-        }
+
 
   return (
     <div className="App">
