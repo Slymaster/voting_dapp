@@ -199,7 +199,7 @@ function App() {
         function showEndVotingSession() {
           return (
           <div className="startVotesTallied">
-            {isOwner() ? <input value="Tallied the votes" type="submit" className="button" /> : null}
+            {isOwner() ? <input onClick={handleChangeStatus5} value="Tallied the votes" type="submit" className="button" /> : null}
           </div>
           );
         }
@@ -225,19 +225,27 @@ function App() {
           await contract.methods.endVotingSession().send({ from: accounts[0] });
         }
 
+        const handleChangeStatus5 = async (e) => {
+          const { accounts, contract } = state;
+          //tallied votes etc. & getWinner+showWinner
+          await contract.methods.endVotingSession().send({ from: accounts[0] });
+        }
+
   return (
     <div className="App">
       <h1>Voting</h1>
       <p>Status : <i>{arrayWorkflowStatus[state.workflowStatus]}</i></p>
       <p>Owner: {state.ownerAddress}</p>
 
-      {state.workflowStatus === '0' ? showVotersRegistration() : null}
-      {state.workflowStatus === '1' ? showStartProposals() : null}
-      {state.workflowStatus === '2' ? showEndProposals() : null}
-      {state.workflowStatus === '3' ? showStartVotingSession() : null}
-      {state.workflowStatus === '4' ? showEndVotingSession() : null}
-
-      <div id="address"></div>
+      {
+        {
+          '0': showVotersRegistration(),
+          '1': showStartProposals(),
+          '2': showEndProposals(),
+          '3': showStartVotingSession(),
+          '4': showEndVotingSession()
+        }[state.workflowStatus]
+      }
 
     </div>
   );
