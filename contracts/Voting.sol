@@ -34,8 +34,8 @@ contract Voting is Ownable {
     }
 
     /**
-     * @notice Allows us to know where we are in the contract, more precisely we talk about the state, a follow-up
-     * @dev The owner of contract proceeds to the state change according to the different scenarios, represented by an enum
+     * @notice Allows us to know where we are in the contract, more precisely we talk about the status, a follow-up
+     * @dev The owner of contract proceeds to the status change according to the different scenarios, represented by an enum
      */
     enum  WorkflowStatus {
         RegisteringVoters,
@@ -67,7 +67,7 @@ contract Voting is Ownable {
     // ::::::::::::: GETTERS ::::::::::::: //
 
     /**
-     * @notice Retrieves the current state of the contract
+     * @notice Retrieves the current status of the contract
      * @dev The value of workflowStatus is returned
      */
     function getWorkflowStatus() external view returns (WorkflowStatus status) {
@@ -120,7 +120,7 @@ contract Voting is Ownable {
 
     /**
      * @notice The owner can add a voter
-     * @dev If the workflow state is RegisteringVoters, and the id of the voter passed in parameter is not already registered
+     * @dev If the workflow status is RegisteringVoters, and the id of the voter passed in parameter is not already registered
      */
     function addVoter(address _addr) external onlyOwner {
         require(workflowStatus == WorkflowStatus.RegisteringVoters, 'Voters registration is not open yet');
@@ -134,7 +134,7 @@ contract Voting is Ownable {
 
     /**
      * @notice Adds a proposition with a description, only voters can use this function
-     * @dev The voter must submit a description for his proposal, the state must be ProposalsRegistrationStarted
+     * @dev The voter must submit a description for his proposal, the status must be ProposalsRegistrationStarted
      */
     function addProposal(string memory _desc) external onlyVoters {
         require(workflowStatus == WorkflowStatus.ProposalsRegistrationStarted, 'Proposals are not allowed yet');
@@ -151,7 +151,7 @@ contract Voting is Ownable {
 
     /**
      * @notice Submit a vote by its id, only voters can use this function
-     * @dev The voter must submit a vote for his favorite proposal, the state must be VotingSessionStarted, the proposal id must exist and the voter can only vote once
+     * @dev The voter must submit a vote for his favorite proposal, the status must be VotingSessionStarted, the proposal id must exist and the voter can only vote once
      */
     function setVote( uint _id) external onlyVoters {
         require(workflowStatus == WorkflowStatus.VotingSessionStarted, 'Voting session havent started yet');
