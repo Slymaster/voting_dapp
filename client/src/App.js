@@ -140,7 +140,7 @@ function App() {
             <input type="submit" value="Send proposal" />
             </form>
             : null}
-            {isOwner() ? <input onClick={handleChangeStatus2} type="submit" value="End proposals registration" className="button" /> : null}
+            {isOwner() ? <input onClick={handleChangeStatus} type="submit" value="End proposals registration" className="button" /> : null}
           </div>
           );
         }
@@ -148,7 +148,7 @@ function App() {
         function showEndProposals() {
           return (
           <div className="endProposals">
-            {isOwner() ? <input onClick={handleChangeStatus3} type="submit" value="Start voting session" className="button" /> : null}
+            {isOwner() ? <input onClick={handleChangeStatus} type="submit" value="Start voting session" className="button" /> : null}
           </div>
           );
         }
@@ -191,7 +191,7 @@ function App() {
             }
             {state.proposals.length > 0 ? <input value="Send vote" type="submit" className="button" /> : null }
             </form>
-            {isOwner() ? <input onClick={handleChangeStatus4} type="submit" value="End voting session" className="button" /> : null}
+            {isOwner() ? <input onClick={handleChangeStatus} type="submit" value="End voting session" className="button" /> : null}
           </div>
           );
         }
@@ -199,13 +199,13 @@ function App() {
         function showEndVotingSession() {
           return (
           <div className="startVotesTallied">
-            {isOwner() ? <input onClick={handleChangeStatus5} value="Tallied the votes" type="submit" className="button" /> : null}
+            {isOwner() ? <input onClick={handleChangeStatus} value="Tallied the votes" type="submit" className="button" /> : null}
           </div>
           );
         }
 
         const getWinner = async (e) => {
-          const { accounts, contract } = state;
+          const { contract } = state;
           let winner = await contract.methods.getWinner().call();
           console.log(winner);
           setState(s => ({...s, winner: winner.description}))
@@ -222,28 +222,24 @@ function App() {
 
         const handleChangeStatus = async (e) => {
           const { accounts, contract } = state;
-          await contract.methods.startProposalsRegistering().send({ from: accounts[0] });
-        }
-
-        const handleChangeStatus2 = async (e) => {
-          const { accounts, contract } = state;
-          await contract.methods.endProposalsRegistering().send({ from: accounts[0] });
-        }
-        
-        const handleChangeStatus3 = async (e) => {
-          const { accounts, contract } = state;
-          await contract.methods.startVotingSession().send({ from: accounts[0] });
-        }
-
-
-        const handleChangeStatus4 = async (e) => {
-          const { accounts, contract } = state;
-          await contract.methods.endVotingSession().send({ from: accounts[0] });
-        }
-
-        const handleChangeStatus5 = async (e) => {
-          const { accounts, contract } = state;
-          await contract.methods.tallyVotes().send({ from: accounts[0] });
+          switch(state.workflowStatus) {
+            case '0':
+              await contract.methods.startProposalsRegistering().send({ from: accounts[0] });
+              break;
+            case '1':
+              await contract.methods.endProposalsRegistering().send({ from: accounts[0] });
+              break;
+            case '2':
+              await contract.methods.startVotingSession().send({ from: accounts[0] });
+              break;
+            case '3':
+              await contract.methods.endVotingSession().send({ from: accounts[0] });
+              break;
+            case '4':
+              await contract.methods.tallyVotes().send({ from: accounts[0] });
+              break;
+          }
+          
         }
 
   return (
