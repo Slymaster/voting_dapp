@@ -9,7 +9,6 @@ import "./App.css";
 function App() {
   const [state, setState] = useState({ workflowStatus: null, web3: null, accounts: null, contract: null, ownerAddress: null, isRegisteredVoter: null, proposals: [], winner: null });
   const inputRef = useRef();
-  const [setEventValue, setSetEventValue] = useState (0)
 
   let arrayWorkflowStatus = [
     'Registering voters',
@@ -39,22 +38,11 @@ function App() {
 
         let status = await instance.methods.getWorkflowStatus().call();
         const address = await instance.methods.owner().call();
+        
         // Set web3, accounts, and contract to the state, and then proceed with an
         // example of interacting with the contract's methods.
         setState({ workflowStatus: status, web3: web3, accounts: accounts, contract: instance, ownerAddress: address, isRegisteredVoter: null, proposals: [], winner: null });
-
-
-      /*  await instance.events.SetEvent()
-          .on('data', event => {
-            let value = event.returnValues.value;
-            console.log(value);
-            setSetEventValue(value);
-          })
-          .on('changed', changed => console.log(changed))
-          // .on('error', err => throw err)
-          .on('connected', str => console.log(str))
-*/
-          
+   
       } catch (error) {
         // Catch any errors for any of the above operations.
         alert(
@@ -64,10 +52,6 @@ function App() {
       }
     })();
   }, [])
-
-  useEffect(()=> {
-    setState(s => ({...s, workflowStatus: setEventValue}))
-  }, [setEventValue])
 
   const handleSubmit = async (e) => {
     e.preventDefault();
