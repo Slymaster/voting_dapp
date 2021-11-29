@@ -121,10 +121,10 @@ function App() {
     setState(s => ({...s, isRegisteredVoter: voter.isRegistered}))
   }
 
-        // Start voters registration
-        function showVotersRegistration() {
-          return ( 
-          <div className="votersRegistration">
+  // Start voters registration
+  function showVotersRegistration() {
+    return ( 
+      <div className="votersRegistration">
           { isOwner() ?
             <form onSubmit={handleSubmit}>
               <label>
@@ -174,16 +174,12 @@ function App() {
               }}
           />
       );
-
-      function onChange(value) {
-        console.log(value);
-      }
         
-        const getProposals = async (e) => {
-          const { accounts, contract } = state;
-          const result = await contract.methods.getProposals().call({ from: accounts[0] });
-          setState(s => ({...s, proposals: result}))
-        }
+      const getProposals = async (e) => {
+        const { accounts, contract } = state;
+        const result = await contract.methods.getProposals().call({ from: accounts[0] });
+        setState(s => ({...s, proposals: result}))
+      }
 
         function showStartVotingSession() {
           return (
