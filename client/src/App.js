@@ -38,11 +38,11 @@ function App() {
 
         let status = await instance.methods.getWorkflowStatus().call();
         const address = await instance.methods.owner().call();
-        
+
         // Set web3, accounts, and contract to the state, and then proceed with an
         // example of interacting with the contract's methods.
         setState({ workflowStatus: status, web3: web3, accounts: accounts, contract: instance, ownerAddress: address, isRegisteredVoter: null, proposals: [], winner: null });
-   
+
       } catch (error) {
         // Catch any errors for any of the above operations.
         alert(
@@ -75,26 +75,26 @@ function App() {
 
   const handleChangeStatus = async (e) => {
     const { accounts, contract } = state;
-    switch(state.workflowStatus) {
+    switch (state.workflowStatus) {
       case '0':
         await contract.methods.startProposalsRegistering().send({ from: accounts[0] });
-        setState(s => ({...s, workflowStatus: '1'}))
+        setState(s => ({ ...s, workflowStatus: '1' }))
         break;
       case '1':
         await contract.methods.endProposalsRegistering().send({ from: accounts[0] });
-        setState(s => ({...s, workflowStatus: '2'}))
+        setState(s => ({ ...s, workflowStatus: '2' }))
         break;
       case '2':
         await contract.methods.startVotingSession().send({ from: accounts[0] });
-        setState(s => ({...s, workflowStatus: '3'}))
+        setState(s => ({ ...s, workflowStatus: '3' }))
         break;
       case '3':
         await contract.methods.endVotingSession().send({ from: accounts[0] });
-        setState(s => ({...s, workflowStatus: '4'}))
+        setState(s => ({ ...s, workflowStatus: '4' }))
         break;
       case '4':
         await contract.methods.tallyVotes().send({ from: accounts[0] });
-        setState(s => ({...s, workflowStatus: '5'}))
+        setState(s => ({ ...s, workflowStatus: '5' }))
         break;
     }
   }
@@ -118,121 +118,120 @@ function App() {
   const isVoter = async (e) => {
     const { accounts, contract } = state;
     let voter = await contract.methods.getVoter(state.accounts[0]).call({ from: accounts[0] });
-    setState(s => ({...s, isRegisteredVoter: voter.isRegistered}))
+    setState(s => ({ ...s, isRegisteredVoter: voter.isRegistered }))
   }
 
   // Start voters registration
   function showVotersRegistration() {
-    return ( 
+    return (
       <div className="votersRegistration">
-          { isOwner() ?
-            <form onSubmit={handleSubmit}>
-              <label>
-                  <input type="text" ref={inputRef} value={state.value} placeholder="0x000000000000000000000000000000000000dead" onChange={handleChange} />
-              </label>
+        {isOwner() ?
+          <form onSubmit={handleSubmit}>
+            <label>
+              <input type="text" ref={inputRef} value={state.value} placeholder="0x000000000000000000000000000000000000dead" onChange={handleChange} />
+            </label>
             <input type="submit" value="Send address for white list" />
-            </form> 
-            : null }
-            {isOwner() ? <input onClick={handleChangeStatus} type="submit" value="Start proposals registration" className="button" /> : null}
-          </div>
-          );
-        }
+          </form>
+          : null}
+        {isOwner() ? <input onClick={handleChangeStatus} type="submit" value="Start proposals registration" className="button" /> : null}
+      </div>
+    );
+  }
 
-        // Start proposals
-        function showStartProposals() {
-          isVoter();
-          return (
-          <div className="startProposals">
-            {state.isRegisteredVoter ?
-            <form onSubmit={handleSubmit}>
-              <label>
-                  <input type="text" ref={inputRef} value={state.value} placeholder="Proposal" onChange={handleChange} />
-              </label>
+  // Start proposals
+  function showStartProposals() {
+    isVoter();
+    return (
+      <div className="startProposals">
+        {state.isRegisteredVoter ?
+          <form onSubmit={handleSubmit}>
+            <label>
+              <input type="text" ref={inputRef} value={state.value} placeholder="Proposal" onChange={handleChange} />
+            </label>
             <input type="submit" value="Send proposal" />
-            </form>
-            : null}
-            {isOwner() ? <input onClick={handleChangeStatus} type="submit" value="End proposals registration" className="button" /> : null}
-          </div>
-          );
-        }
+          </form>
+          : null}
+        {isOwner() ? <input onClick={handleChangeStatus} type="submit" value="End proposals registration" className="button" /> : null}
+      </div>
+    );
+  }
 
-        // End proposals
-        function showEndProposals() {
-          return (
-          <div className="endProposals">
-            {isOwner() ? <input onClick={handleChangeStatus} type="submit" value="Start voting session" className="button" /> : null}
-          </div>
-          );
-        }
+  // End proposals
+  function showEndProposals() {
+    return (
+      <div className="endProposals">
+        {isOwner() ? <input onClick={handleChangeStatus} type="submit" value="Start voting session" className="button" /> : null}
+      </div>
+    );
+  }
 
-        const ColoredLine = ({ color }) => (
-          <hr
-              style={{
-                  color: color,
-                  backgroundColor: color,
-                  height: 5
-              }}
-          />
-      );
-        
-      const getProposals = async (e) => {
-        const { accounts, contract } = state;
-        const result = await contract.methods.getProposals().call({ from: accounts[0] });
-        setState(s => ({...s, proposals: result}))
-      }
+  const ColoredLine = ({ color }) => (
+    <hr
+      style={{
+        color: color,
+        backgroundColor: color,
+        height: 5
+      }}
+    />
+  );
 
-        function showStartVotingSession() {
-          return (
-          <div className="startVotingSession">
-            {state.proposals.length === 0 && state.isRegisteredVoter ? <input onClick={getProposals} type="submit" value="Show me proposals" className="button" /> : null }
-            <ColoredLine color="blue" />
-            <form onSubmit={handleSubmit}>
-            {
-              state.proposals.map((element,i) => {
-                return(
+  const getProposals = async (e) => {
+    const { accounts, contract } = state;
+    const result = await contract.methods.getProposals().call({ from: accounts[0] });
+    setState(s => ({ ...s, proposals: result }))
+  }
+
+  function showStartVotingSession() {
+    return (
+      <div className="startVotingSession">
+        {state.proposals.length === 0 && state.isRegisteredVoter ? <input onClick={getProposals} type="submit" value="Show me proposals" className="button" /> : null}
+        <ColoredLine color="blue" />
+        <form onSubmit={handleSubmit}>
+          {
+            state.proposals.map((element, i) => {
+              return (
                 <div>
                   <input type="radio" name="vote" value={element.description} id={i} key={i} />
                   <label for="{i}">{element.description}</label>
                 </div>
-                );
-              })
-            }
-            {state.proposals.length > 0 ? <input value="Send vote" type="submit" className="button" /> : null }
-            </form>
-            {isOwner() ? <input onClick={handleChangeStatus} type="submit" value="End voting session" className="button" /> : null}
-          </div>
-          );
-        }
+              );
+            })
+          }
+          {state.proposals.length > 0 ? <input value="Send vote" type="submit" className="button" /> : null}
+        </form>
+        {isOwner() ? <input onClick={handleChangeStatus} type="submit" value="End voting session" className="button" /> : null}
+      </div>
+    );
+  }
 
-        function showEndVotingSession() {
-          return (
-          <div className="startVotesTallied">
-            {isOwner() ? <input onClick={handleChangeStatus} value="Tallied the votes" type="submit" className="button" /> : null}
-          </div>
-          );
-        }
+  function showEndVotingSession() {
+    return (
+      <div className="startVotesTallied">
+        {isOwner() ? <input onClick={handleChangeStatus} value="Tallied the votes" type="submit" className="button" /> : null}
+      </div>
+    );
+  }
 
-        const getWinner = async (e) => {
-          const { contract } = state;
-          let winner = await contract.methods.getWinner().call();
-          console.log(winner);
-          setState(s => ({...s, winner: winner.description + ' 🏆'}))
-        }
+  const getWinner = async (e) => {
+    const { contract } = state;
+    let winner = await contract.methods.getWinner().call();
+    setState(s => ({ ...s, winner: winner.description + ' 🏆' }))
+  }
 
-        function showWinner() {
-          return (
-          <div className="startVotesTallied">
-            <input onClick={getWinner} value="Get winner" type="submit" className="button" />
-            <p>The winner is : {state.winner}</p>
-          </div>
-          );
-        }
+  function showWinner() {
+    return (
+      <div className="startVotesTallied">
+        <input onClick={getWinner} value="Get winner" type="submit" className="button" />
+        <p>The winner is : {state.winner}</p>
+      </div>
+    );
+  }
 
 
 
   return (
     <div className="App">
-      <h1>Voting</h1>    
+      <h1>Voting</h1>
       <p>Status : <i>{arrayWorkflowStatus[state.workflowStatus]}</i></p>
       <p>Owner: {state.ownerAddress}</p>
       {
