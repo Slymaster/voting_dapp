@@ -29703,10 +29703,16 @@
       "links": {},
       "address": "0x68a12a83E3BF31808CB7173a477bf4588FD1c827",
       "transactionHash": "0xebcc4f103e580178ac187d01e0735d0f6b5a6c3b7ce20e2c39a116e3d16205c8"
+    },
+    "1638204499764": {
+      "events": {},
+      "links": {},
+      "address": "0x9e77570831b2165Cb42d7df72ce69278c55E104b",
+      "transactionHash": "0xe34a108eebb28f736a862ec3d02091cd0b1e7a382449d1eb0caac135ad0e7418"
     }
   },
   "schemaVersion": "3.4.3",
-  "updatedAt": "2021-11-29T15:53:40.538Z",
+  "updatedAt": "2021-11-29T16:52:19.528Z",
   "networkType": "ethereum",
   "devdoc": {
     "details": "All features have been verified with Truffle are functional without side effects. We have chosen to use Ownable from OpenZeppelin library.",
